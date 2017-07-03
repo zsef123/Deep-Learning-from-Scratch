@@ -12,6 +12,8 @@ def cse(y, t):
         batch_size = y.shape[0]
     return -np.sum( t * np.log(y) ) / batch_size
 
+# answer label is '2', '7' and number labels
+# not one-hot encoding
 def cse_label(y, t):
     if y.ndim == 1:
         t = t.reshape(1, t.size)
