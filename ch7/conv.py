@@ -54,8 +54,53 @@ class Convolution:
         col = im2col(x, FH, FW, self.stride, self.pad)
         col_W = self.W.reshape(FN, -1).T
         out = np.dot(col, col_W) + self.b
-        out = out.reshape(N, out_H, out_W, -1).transpose(0,3,1,2)
-        return out
+        
+        return out.reshape(N, out_H, out_W, -1).transpose(0,3,1,2)
 
-    def backward(self, y):
-        return out
+    # book's code ## /common/layer.py - class Convolution
+    def backward(self, dout):
+        FN, C, FH, FW = self.W.shape
+        dout = dout.transpose(0,2,3,1).reshape(-1, FN)
+
+        self.db = np.sum(dout, axis=0)
+        self.dW = np.dot(self.col.T, dout)
+        self.dW = self.dW.transpose(1, 0).reshape(FN, C, FH, FW)
+
+        dcol = np.dot(dout, self.col_W.T)
+        dx = col2im(dcol, self.x.shape, FH, FW, self.stride, self.pad)
+
+        return dx
+
+class Pool:
+    def __init__(self, pool_H, pool_W, stride = 1 , pad = 0):
+        self.H = pool_H
+        self.W = pool_W
+        self.stride = stride
+        self.pad = pad
+
+    def foward(self, x):
+        N, C, H, W = x.shape
+
+        out_L = lambda a,b: int( (a-b) / self.stride) + 1
+        out_H = out_L(H, self.H)
+        out_W = out_L(W, self.W)
+
+        col = im2col(x, self.H, self.W, self.stride, self.pad)
+        col = col.reshape(-1, self.H * self.W)
+
+        out = np.max(col, axis=1) # row order
+        return out.reshape(N, out_H, out_W, C).transpose(0, 3, 1, 2)
+
+    # book's code ## /common/layer.py - class Pooling
+    def backward(self, dout):
+        dout = dout.transpose(0, 2, 3, 1)
+        
+        pool_size = self.H * self.W
+        dmax = np.zeros((dout.size, pool_size))
+        dmax[np.arange(self.arg_max.size), self.arg_max.flatten()] = dout.flatten()
+        dmax = dmax.reshape(dout.shape + (pool_size,)) 
+        
+        dcol = dmax.reshape(dmax.shape[0] * dmax.shape[1] * dmax.shape[2], -1)
+        dx = col2im(dcol, self.x.shape, self.H, self.W, self.stride, self.pad)
+        
+        return dx

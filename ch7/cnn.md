@@ -39,5 +39,28 @@ ex) MNIST 사용시 height * weight * channel로 1차원 데이터로 변경하�
 공간의 크기를 줄인다.<br>
 따라서 학습 X, 채널 수 변동 X, 데이터 변화에 따른 영향 축소.
 
- 
+Max Pool, Average Pool, ...
 
+[conv.py](conv.py)
+
+## CNN 구현하기
+
+Convoultion과 Pooling 계층은 이미지를 행렬로 전개하여 구현한다.
+
+Conv1 - ReLU - Pool - Affine - ReLU - Affine - SoftmaxWithLoss
+
+를 적용 시킨다
+
+[network.py](network.py)
+
+## CNN 시각화
+
+각각의 계층 필터들을 시각화 해본다면
+
+초기 필터는 에지, 블롭 등의 원시적인 정보를 추출하고
+뒤로 갈수록 점점 고급 시각 정보가 인식된다.
+
+대표적인 CNN으로
+
+1. LeNet<br>
+2. AlexNet<br>
